@@ -17,14 +17,17 @@ matmort_subset <- matmort_subset %>%
   mutate(Year = as.numeric(Year))
 
 
-usethis::use_git_config(user.name = "Sheharyar Raza", user.email = "sheharyar.raza@gmail.com")
+
 
 
 
 gitcreds::gitcreds_set(url = "[https://github.com](https://github.com)") #this will prompt you for a token
 
 
-usethis::use_git()
+# usethis::use_git() # initializes new git repository
+# use_github() connect local repo
 
-usethis::use_github()
+#hello test 
 
+# Stage specific files or all changes
+usethis::use_git_hook(name = "update 1")
