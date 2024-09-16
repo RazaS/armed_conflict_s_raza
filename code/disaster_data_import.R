@@ -25,4 +25,5 @@ disaster_subset_dummy_summarized <- disaster_subset_dummy %>%
 
 
 
-usethis::use_git()
+use_git()
+use_github()
