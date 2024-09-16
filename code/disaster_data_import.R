@@ -4,8 +4,6 @@ library (tidyverse)
 library(usethis) 
 
 
-
-
 here() #set wd
 
 disaster <- read.csv("data/disaster.csv")
@@ -21,3 +19,10 @@ disaster_subset_dummy <- disaster_subset %>%
   )
 
 
+disaster_subset_dummy_summarized <- disaster_subset_dummy %>% 
+  group_by(Year, ISO)  %>% 
+  summarize ( drought = max(drought), earthquake = max(earthquake), .groups="drop")
+
+
+
+usethis::use_git()
