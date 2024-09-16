@@ -18,14 +18,13 @@ matmort_subset <- matmort_subset %>%
 
 
 
-
-
-
 gitcreds::gitcreds_set(url = "[https://github.com](https://github.com)") #this will prompt you for a token
 
 
 # usethis::use_git() # initializes new git repository
 # use_github() connect local repo
+
+usethis::use_git()
 
 #hello test 
 
