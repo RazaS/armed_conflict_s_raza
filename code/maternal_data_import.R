@@ -25,6 +25,7 @@ gitcreds::gitcreds_set(url = "[https://github.com](https://github.com)") #this w
 # use_github() connect local repo
 
 usethis::use_git()
+use_github()
 
 #change 2
 #hello test 
