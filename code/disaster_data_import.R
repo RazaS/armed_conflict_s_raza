@@ -24,6 +24,5 @@ disaster_subset_dummy_summarized <- disaster_subset_dummy %>%
   summarize ( drought = max(drought), earthquake = max(earthquake), .groups="drop")
 
 
-
-use_git()
-use_github()
+# use_git()
+# use_github()
