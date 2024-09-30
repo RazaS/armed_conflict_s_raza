@@ -17,12 +17,12 @@ conflictdata <- conflictdata %>% mutate(best_binary= ifelse(best >0, TRUE, FALSE
 conflictdata <- conflictdata %>% mutate(year = year+1) 
 
 
-library(usethis) 
-
-usethis::use_git_config(user.name = "Sheharyar Raza", user.email = "sheharyar.raza@gmail.com")
- 
-# to confirm, generate a git situation-report, your user name and email should appear under Git config (global)
-usethis::git_sitrep()
+# library(usethis) 
+# 
+# usethis::use_git_config(user.name = "Sheharyar Raza", user.email = "sheharyar.raza@gmail.com")
+#  
+# # to confirm, generate a git situation-report, your user name and email should appear under Git config (global)
+# usethis::git_sitrep()
 
 
 

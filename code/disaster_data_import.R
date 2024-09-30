@@ -21,7 +21,7 @@ disaster_subset_dummy <- disaster_subset %>%
 
 disaster_subset_dummy_summarized <- disaster_subset_dummy %>% 
   group_by(Year, ISO)  %>% 
-  summarize ( drought = max(drought), earthquake = max(earthquake), .groups="drop")
+  summarize ( drought = max(drought), earthquake = max(earthquake), .groups="drop")%>% rename(year=Year) ##rename Year to year
 
 
 # use_git()
