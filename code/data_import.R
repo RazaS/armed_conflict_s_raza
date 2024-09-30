@@ -15,6 +15,7 @@ neonatal <- read.csv("data/neonatalmortality.csv")
 under5 <- read.csv("data/under5mortality.csv")
 covariates <- read.csv("data/covariates.csv")
 
+## function for data cleaning and organizing via pivot 
 data_cleaning <- function (dataframe, columnLabel) {
  
   data_subset <- dataframe %>% select (Country.Name, X2000:X2019)
@@ -26,12 +27,13 @@ data_cleaning <- function (dataframe, columnLabel) {
   
 }
 
-### function to join
+### function to join dataframes using reduce function 
 combine_dataframes <- function (list_of_dataframes, join_by_list) {
   
   combined_dataframe <- reduce(list_of_dataframes, left_join, by=join_by_list)
   
 }
+
 
 # clean data, except for disaster csv
 matmort_subset <- data_cleaning (matmort, "MatMort")
@@ -42,7 +44,6 @@ under5_subset <- data_cleaning (matmort, "Under5Mort")
 subset_list <- list(matmort_subset, infant_subset, neonatal_subset, under5_subset)
 
 join_by_columns <- c("Country.Name", "Year")
-
 
 
 
@@ -58,19 +59,20 @@ outcomes_subset <- outcomes_subset %>% select(-Country.Name) %>% rename(year=Yea
 
 
 ## download and clean and wrangle disaster dataset
-
 disaster <- read.csv("data/disaster.csv")
 
 disaster_subset <- disaster %>% filter (Disaster.Type %in% c("Earthquake", "Drought"), Year>=2000, Year<=2019)
 
 disaster_subset <- disaster_subset %>% select(Year, ISO, Disaster.Type)
 
+## create dummy variables
 disaster_subset_dummy <- disaster_subset %>%
   mutate(
     drought_dummy = as.integer(Disaster.Type == "Drought"),  # Creates 'drought' dummy variable
     earthquake_dummy = as.integer(Disaster.Type == "Earthquake")  # Creates 'earthquake' dummy variable
   )
 
+## assigns values to dummy variable and collapses into one row based on max value (if any 1, final value is 1, if all 0, final value is 0)
 disaster_subset_dummy_summarized <- disaster_subset_dummy %>% 
   group_by(Year, ISO)  %>% 
   summarize ( drought_dummy = max(drought_dummy), earthquake_dummy = max(earthquake_dummy), .groups="drop")%>% rename(year=Year) ##rename Year to year
