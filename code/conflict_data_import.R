@@ -11,10 +11,16 @@ here() #set wd
 conflictdata <- read.csv("data/conflictdata.csv")
 
 ## make conflict binary
-conflictdata <- conflictdata %>% mutate(best_binary= ifelse(best >0, TRUE, FALSE)) %>% group_by(ISO,year) %>% summarise(best_binary = any(best_binary), .groups = 'drop') 
+conflictdata <- conflictdata %>% 
+  group_by(ISO, year) %>%
+  summarize(totdeath = max(best)) %>%
+  mutate(best_binary = ifelse(totdeath > 0, 1, 0)) %>%
+  ungroup() 
 
 ## lag a year, remove original year column
 conflictdata <- conflictdata %>% mutate(year = year+1) 
+
+
 
 
 # library(usethis) 

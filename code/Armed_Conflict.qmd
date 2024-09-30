@@ -1,0 +1,100 @@
+---
+title: "Exploratory Analysis for Armed Conflict Data"
+author: "Sheharyar Raza"
+format: html
+editor: visual
+---
+
+## Exploratory Data Analysis
+
+This document contains exploratory data analysis for the armed conflict data.
+
+### Table of Contents
+
+1.  First
+
+2.  Second
+
+3.  Third
+
+4.  Fourth
+
+5.  
+
+
+#### Loading Data
+```{r}
+#| output: false 
+#| echo: false
+
+here() #set wd
+# Running the script using source()
+df <- read.csv("../data/final_analysis_dataset.csv")
+
+
+```
+
+
+#### Initial checks for data dimensions
+```{r}
+#| output: false 
+#| echo: false
+
+df
+
+```
+
+
+#### Checking all variables for type and structure
+```{r}
+#| output: false 
+#| echo: false
+
+glimpse(df)
+
+```
+
+
+#### Initial checks for data dimensions
+```{r}
+#| output: false 
+#| echo: false
+
+df
+
+```
+
+
+
+
+#### Initial checks for data dimensions
+```{r}
+#| output: false 
+#| echo: false
+
+summary(df)
+
+
+
+```
+
+
+
+
+#### Initial checks for data dimensions
+```{r}
+#| output: false 
+#| echo: false
+
+df
+
+```
+
+
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
