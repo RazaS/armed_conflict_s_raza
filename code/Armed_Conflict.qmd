@@ -2,30 +2,48 @@
 title: "Exploratory Analysis for Armed Conflict Data"
 author: "Sheharyar Raza"
 format: html
-editor: visual
 ---
 
 ## Exploratory Data Analysis
 
 This document contains exploratory data analysis for the armed conflict data.
 
+***
+
 ### Table of Contents
 
-1.  First
+1.  Load data
 
-2.  Second
+2.  Initial check for data dimensions
 
-3.  Third
+3.  Checking variable types and general structure
 
-4.  Fourth
+4.  Data summary of numerical variables
 
-5.  
+5.  Data visualization for predictor and covariates
 
+6.  Data visualization for outcome variables
+
+7.  Check for co-linearity between covariates
+
+8.  Check for co-linearity between outcomes
+
+***
 
 #### Loading Data
+
 ```{r}
 #| output: false 
 #| echo: false
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(ggplot2)
+  library(gridExtra)
+  library(reshape2)
+  library(tidyr)
+  library(here)
+  library(usethis)
+})
 
 here() #set wd
 # Running the script using source()
@@ -34,67 +52,338 @@ df <- read.csv("../data/final_analysis_dataset.csv")
 
 ```
 
-
+***
 #### Initial checks for data dimensions
+
 ```{r}
-#| output: false 
 #| echo: false
 
-df
+head(df,10)
 
 ```
-
-
+***
 #### Checking all variables for type and structure
+
 ```{r}
-#| output: false 
 #| echo: false
 
 glimpse(df)
 
 ```
-
-
-#### Initial checks for data dimensions
-```{r}
-#| output: false 
-#| echo: false
-
-df
-
-```
-
-
-
-
-#### Initial checks for data dimensions
-```{r}
-#| output: false 
-#| echo: false
-
-summary(df)
-
-
-
-```
-
-
-
-
-#### Initial checks for data dimensions
-```{r}
-#| output: false 
-#| echo: false
-
-df
-
-```
-
-
+***
+#### Data summary of numerical variables
 
 ```{r}
 #| echo: false
-2 * 2
+
+# Subset the dataframe to include only numeric and boolean (logical) columns
+numeric_and_logical_df <- df[, sapply(df, function(col) is.numeric(col) | is.logical(col))]
+
+# Run the summary() function on the subsetted dataframe
+summary(numeric_and_logical_df)
+
+```
+***
+#### Initial checks for covariates distribution
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# List of variables
+variables <- c("gdp1000", "popdens", "urban", "agedep", "male_edu", "temp", "rainfall1000", "totdeath")
+
+# Create an empty list to store the plots
+plot_list <- list()
+
+# Loop through each variable and create boxplots
+for (var in variables) {
+  plot_list[[var]] <- ggplot(df, aes(y = .data[[var]])) +
+    geom_boxplot(outlier.colour = "red", outlier.shape = 16, outlier.size = 2) +
+    labs(title = paste("Box Plot of", var),
+         x = "",
+         y = var) +
+    theme_minimal()
+}
+
+# Add the log-transformed gdp1000 boxplot to the list
+plot_list[["log_gdp1000"]] <- ggplot(df, aes(y = log(gdp1000))) +
+  geom_boxplot(outlier.colour = "red", outlier.shape = 16, outlier.size = 2) +
+  labs(title = "Box Plot of log(gdp1000)",
+       x = "",
+       y = "log(gdp1000)") +
+  theme_minimal()
+
+# Arrange all plots in a grid layout (3 columns)
+do.call(grid.arrange, c(plot_list, ncol = 3))
+
+
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+From this we learn that total death and GDP are highly skewed variables. It is reasonable, therefore, that we will be using a binary variable for total death. For GDP, the logarithamized graph would likely be easier to visualize.
+
+***
+#### Visualizing the spread of outcomes 
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# List of outcome variables
+outcomes <- c("MatMort", "InfantMort", "NeonatalMort", "Under5Mort")
+
+# Create an empty list to store the plots
+plot_list <- list()
+
+# Loop through each outcome variable and create boxplots
+for (outcome in outcomes) {
+  plot_list[[outcome]] <- ggplot(df, aes(y = .data[[outcome]])) +
+    geom_boxplot(outlier.colour = "red", outlier.shape = 16, outlier.size = 2) +
+    labs(title = paste("Box Plot of", outcome),
+         x = "",
+         y = outcome) +
+    theme_minimal()
+}
+
+# Arrange all plots in a grid layout (2 columns)
+do.call(grid.arrange, c(plot_list, ncol = 2))
+
+
+```
+
+As we can see, all these outcome variables have some extreme outliers, something to consider during data analysis later on. 
+
+***
+#### Correlation matrix for covariates
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+suppressPackageStartupMessages({
+library(reshape2)
+})
+# Subset the dataframe to include only the selected variables
+variables <- c("gdp1000", "popdens", "urban", "agedep", "male_edu", "temp", "rainfall1000", "totdeath")
+subset_df <- df[, variables]
+
+# Calculate the correlation matrix
+correlation_matrix <- cor(subset_df, use = "complete.obs")  # 'complete.obs' ensures NA values are ignored
+
+# Print the correlation matrix
+print(correlation_matrix)
+
+
+# Optionally, visualize the correlation matrix using ggplot2
+melted_correlation <- melt(correlation_matrix)
+
+ggplot(data = melted_correlation, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, limit = c(-1, 1), space = "Lab", 
+                       name = "Correlation") +
+  theme_minimal() +
+  labs(title = "Correlation Matrix") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+
+```
+
+The correlation matrix reveals key relationships between socioeconomic and environmental variables. Higher GDP is positively linked to male education and urbanization but negatively associated with age dependency and temperature (likely reflecting other confounders), indicating that wealthier countries tend to have better education, more urbanization, and lower age dependency. Urbanization is strongly correlated with population density. These are important insights because they verify relationships that align with our knowledge of the world. 
+
+***
+#### Correlation matrix for outcomes
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# List of variables
+variables <- c("MatMort", "InfantMort", "NeonatalMort", "Under5Mort")
+subset_df <- df[, variables]
+
+# Calculate the correlation matrix
+correlation_matrix <- cor(subset_df, use = "complete.obs")  # 'complete.obs' ensures NA values are ignored
+
+# Print the correlation matrix
+print(correlation_matrix)
+
+
+# Optionally, visualize the correlation matrix using ggplot2
+melted_correlation <- melt(correlation_matrix)
+
+ggplot(data = melted_correlation, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, limit = c(-1, 1), space = "Lab", 
+                       name = "Correlation") +
+  theme_minimal() +
+  labs(title = "Correlation Matrix") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+
+```
+
+Unsurprisingly, mortality outcomes are all highly inter-correlated (before conditioning on other variables), to the point of not being particularly informative as separate outcomes at this stage. Hence moving forward, I will primarily on total deaths. 
+
+***
+#### Geographic visualization of outcome variable total death
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# Function to check if a package is installed, and install it if not
+install_if_missing <- function(pkg) {
+  if (!require(pkg, character.only = TRUE)) {
+    install.packages(pkg, dependencies = TRUE)
+    library(pkg, character.only = TRUE)
+  }
+}
+required_packages <- c( "rnaturalearth", "rnaturalearthdata")
+
+for (pkg in required_packages) {
+  install_if_missing(pkg)
+}
+
+suppressPackageStartupMessages({
+# Load necessary libraries
+library(rnaturalearth)
+library(rnaturalearthdata)
+})
+
+# Get world map data
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+# Filter data to include only every 5th year and create a new column for year range
+df_totdeath_5yr <- df %>%
+  filter(!is.na(ISO)) %>%
+  filter(year %% 5 == 0) %>%
+  mutate(year_range = paste(year, "-", year + 4)) %>%
+  group_by(ISO, year_range) %>%
+  summarise(totdeath = sum(totdeath, na.rm = TRUE))
+
+# Loop over each year range and create individual plots
+year_ranges <- unique(df_totdeath_5yr$year_range)
+
+for (yr in year_ranges) {
+  # Filter the data for the current year range
+  df_current <- df_totdeath_5yr %>%
+    filter(year_range == yr)
+  
+  # Merge the world map data with the current year's data
+  world_map_current <- world %>%
+    left_join(df_current, by = c("iso_a3" = "ISO"))
+  
+  # Create the heat map for the current year range
+  plot <- ggplot(world_map_current) +
+    geom_sf(aes(fill = totdeath)) +
+    scale_fill_viridis_c(option = "plasma", na.value = "grey90") +  
+    labs(title = paste("World Heat Map of Total Deaths (", yr, ")", sep = ""), fill = "Total Deaths") +
+    theme_minimal() +
+    theme(strip.text = element_text(size = 10))
+  
+  # Print each plot separately
+  print(plot)
+}
+
+```
+Here we plot the total deaths by year over a world map, which is a natural way to plot data for geopolitical variables. This gives us an evolving picture of global conflicts across time with a heatmap showing total deaths. What is particularly noticeable is significant spikes in mortality in the first half of the study in some countries in Africa, and South East Asia and Middle East in the latter half. 
+
+***
+#### Visualization of Deaths by Region
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# Combine Asian, European, and African regions into their respective subgroups as before
+df <- df %>%
+  mutate(region = case_when(
+    region %in% c("Southern Asia", "Western Asia", "Eastern Asia", "South-eastern Asia", "Central Asia") ~ "Asia",
+    region %in% c("Eastern Europe", "Western Europe", "Northern Europe", "Southern Europe") ~ "Europe",
+    region %in% c("Sub-Saharan Africa", "Northern Africa") ~ "Africa",
+    TRUE ~ region
+  ))
+
+# Summarize the data to get average totdeath, popdens, and gdp1000 per country and region
+df_summary <- df %>%
+  filter(!is.na(totdeath) & !is.na(popdens) & !is.na(gdp1000)) %>%
+  group_by(country_name, region) %>%
+  summarise(
+    avg_totdeath = mean(totdeath, na.rm = TRUE),
+    avg_popdens = mean(popdens, na.rm = TRUE),
+    avg_gdp1000 = mean(gdp1000, na.rm = TRUE)
+  )
+
+# Create a bubble plot with popdens on x-axis, gdp1000 on y-axis, bubble size representing average totdeath, and color by region
+ggplot(df_summary, aes(x = avg_popdens, y = log(avg_gdp1000), size = avg_totdeath, color = region)) +
+  geom_point(alpha = 0.7) +  # Adjust transparency
+  scale_size(range = c(2, 20), name = "Avg Total Deaths") +  # Adjust bubble size
+  labs(x = "Population Density", y = "Log GDP (in 1000s)", title = "Bubble Plot of Population Density vs. GDP by Region") +
+  theme_minimal() +
+  theme(legend.position = "right") +  # Place legend on the right
+  scale_color_manual(values = c("Asia" = "#1b9e77", "Africa" = "#d95f02", "Europe" = "#7570b3", 
+                                "Latin America and the Caribbean" = "#e7298a", 
+                                "Australia and New Zealand" = "#66a61e", "Northern America" = "#e6ab02", 
+                                "Melanesia" = "#1f78b4", "Micronesia" = "#b2df8a", "Polynesia" = "#fb9a99"))  # Custom colors for each region
+
+```
+
+Next, we can start to create some visualizations to study relationships between multiple variables which may help us design our causal analyses later. Here we combine several subregions into regions to study them together. In this bubble plot, color represents region, size represents average number of deaths by year, and these are plotted against logarithm of GDP and population density. A relationship is beginning to emerg, showing that countries with lower GDP tend to have higher rates of total deaths, however region tends to show much stronger influence on total deaths. 
+
+***
+#### Bump Chart Visualization for Global Infant Mortality Ranking
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# Define the range of years in the study
+years_in_study <- range(df$year, na.rm = TRUE)
+
+# Identify countries that have data for all years in the study
+countries_with_full_data <- df %>%
+  group_by(country_name) %>%
+  summarise(year_count = n_distinct(year)) %>%
+  filter(year_count == length(seq(years_in_study[1], years_in_study[2]))) %>%
+  pull(country_name) 
+
+# Filter the dataset to include only countries with full data for all years
+df_filtered <- df %>%
+  filter(country_name %in% countries_with_full_data)
+
+# Summarize the data to calculate infant mortality by country and year
+df_infant_mortality <- df_filtered %>%
+  group_by(country_name, year) %>%
+  summarise(avg_infant_mortality = mean(InfantMort, na.rm = TRUE)) %>%
+  arrange(year, desc(avg_infant_mortality))
+
+# Rank countries by infant mortality for each year and select the top 15 per year
+df_infant_mortality_top15 <- df_infant_mortality %>%
+  group_by(year) %>%
+  mutate(rank = rank(-avg_infant_mortality)) %>%  # Rank by descending infant mortality
+  filter(rank <= 15)  # Select the top 10 countries for each year
+
+# Create the bump chart using ggplot
+ggplot(df_infant_mortality_top15, aes(x = year, y = rank, group = country_name, color = country_name)) +
+  geom_line(size = 1) +
+  geom_point(size = 3) +
+  scale_y_reverse(breaks = 1:15) +  
+  labs(x = "Year", y = "Rank", title = "Bump Chart of Top 15 Countries by Infant Mortality Each Year", color = "Country") +
+  theme_minimal() +
+  theme(legend.position = "right")
+
+```
+
+Finally, we look at the top 15 countries with respect to infant mortality over time, which is an outcome of interest Here we use a bump chart. For instance, we see the rank rise in the early 2010s in the DRC, at a time of significant conflict in the region. 
+
+As we can see, there are both numerical and visual ways of exploring the rich information found in this database. The visualizations help suggest many potential avenues for further research, which would require a careful deep dive into particular trends found within the data. 
+
+
+***
