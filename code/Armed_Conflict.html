@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.555">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Sheharyar Raza">
+
+<title>Exploratory Analysis for Armed Conflict Data</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="Armed_Conflict_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Armed_Conflict_files/libs/quarto-html/quarto.js"></script>
+<script src="Armed_Conflict_files/libs/quarto-html/popper.min.js"></script>
+<script src="Armed_Conflict_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Armed_Conflict_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Armed_Conflict_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Armed_Conflict_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Armed_Conflict_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Armed_Conflict_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Armed_Conflict_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Exploratory Analysis for Armed Conflict Data</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Sheharyar Raza </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="exploratory-data-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="exploratory-data-analysis">Exploratory Data Analysis</h2>
+<p>This document contains exploratory data analysis for the armed conflict data.</p>
+<hr>
+<section id="table-of-contents" class="level3">
+<h3 class="anchored" data-anchor-id="table-of-contents">Table of Contents</h3>
+<ol type="1">
+<li><p>Load data</p></li>
+<li><p>Initial check for data dimensions</p></li>
+<li><p>Checking variable types and general structure</p></li>
+<li><p>Data summary of numerical variables</p></li>
+<li><p>Data visualization for predictor and covariates</p></li>
+<li><p>Data visualization for outcome variables</p></li>
+<li><p>Check for co-linearity between covariates</p></li>
+<li><p>Check for co-linearity between outcomes</p></li>
+</ol>
+<hr>
+<section id="loading-data" class="level4">
+<h4 class="anchored" data-anchor-id="loading-data">Loading Data</h4>
+<hr>
+</section>
+<section id="initial-checks-for-data-dimensions" class="level4">
+<h4 class="anchored" data-anchor-id="initial-checks-for-data-dimensions">Initial checks for data dimensions</h4>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>   country_name ISO        region year   gdp1000 OECD OECD2023  popdens
+1   Afghanistan AFG Southern Asia 2000        NA    0        0 14.13654
+2   Afghanistan AFG Southern Asia 2001        NA    0        0 14.23156
+3   Afghanistan AFG Southern Asia 2002 0.1835328    0        0 14.32270
+4   Afghanistan AFG Southern Asia 2003 0.2004626    0        0 14.40691
+5   Afghanistan AFG Southern Asia 2004 0.2216576    0        0 15.21947
+6   Afghanistan AFG Southern Asia 2005 0.2550551    0        0 15.33619
+7   Afghanistan AFG Southern Asia 2006 0.2740005    0        0 15.43982
+8   Afghanistan AFG Southern Asia 2007 0.3750781    0        0 15.65217
+9   Afghanistan AFG Southern Asia 2008 0.3878492    0        0 15.74447
+10  Afghanistan AFG Southern Asia 2009 0.4438452    0        0 15.83043
+      urban   agedep male_edu     temp rainfall1000 totdeath best_binary
+1  16.25324 108.3466 2.762086 12.69959    0.2763704      650           1
+2  16.25661 108.9899 2.856936 12.85570    0.2793079      832           1
+3  16.42654 109.3472 2.954241 12.71081    0.3805710      441           1
+4  16.60701 109.4475 3.054121 12.16592    0.4288939      200           1
+5  16.71367 109.2868 3.156706 13.04643    0.3754336       60           1
+6  16.85096 107.9646 3.262133 12.23141    0.4415680       42           1
+7  16.98105 106.3262 3.370551 12.96153    0.4437097       89           1
+8  17.12259 108.3381 3.482112 12.47451    0.4092555       87           1
+9  17.26919 109.2404 3.596977 12.63527    0.3901204      105           1
+10 17.43508 106.8458 3.715306 12.61764    0.4808727      189           1
+   MatMort InfantMort NeonatalMort Under5Mort drought_dummy earthquake_dummy
+1     1450       90.5         60.9      129.2             1                0
+2     1390       87.9         59.7      125.2             0                1
+3     1300       85.3         58.5      121.1             0                1
+4     1240       82.7         57.2      116.9             0                1
+5     1180       80.0         55.9      112.6             0                1
+6     1140       77.3         54.6      108.4             0                1
+7     1120       74.6         53.2      104.1             1                1
+8     1090       71.9         51.7       99.9            NA               NA
+9     1030       69.2         50.3       95.7             1                0
+10     993       66.7         48.9       91.7             0                1
+   drought earthquake
+1        1          0
+2        0          1
+3        0          1
+4        0          1
+5        0          1
+6        0          1
+7        1          1
+8        0          0
+9        1          0
+10       0          1</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="checking-all-variables-for-type-and-structure" class="level4">
+<h4 class="anchored" data-anchor-id="checking-all-variables-for-type-and-structure">Checking all variables for type and structure</h4>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 3,720
+Columns: 23
+$ country_name     &lt;chr&gt; "Afghanistan", "Afghanistan", "Afghanistan", "Afghani…
+$ ISO              &lt;chr&gt; "AFG", "AFG", "AFG", "AFG", "AFG", "AFG", "AFG", "AFG…
+$ region           &lt;chr&gt; "Southern Asia", "Southern Asia", "Southern Asia", "S…
+$ year             &lt;int&gt; 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,…
+$ gdp1000          &lt;dbl&gt; NA, NA, 0.1835328, 0.2004626, 0.2216576, 0.2550551, 0…
+$ OECD             &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…
+$ OECD2023         &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…
+$ popdens          &lt;dbl&gt; 14.136539, 14.231558, 14.322705, 14.406906, 15.219471…
+$ urban            &lt;dbl&gt; 16.25324, 16.25661, 16.42654, 16.60701, 16.71367, 16.…
+$ agedep           &lt;dbl&gt; 108.34663, 108.98989, 109.34716, 109.44753, 109.28682…
+$ male_edu         &lt;dbl&gt; 2.762086, 2.856936, 2.954241, 3.054121, 3.156706, 3.2…
+$ temp             &lt;dbl&gt; 12.69959, 12.85570, 12.71081, 12.16592, 13.04643, 12.…
+$ rainfall1000     &lt;dbl&gt; 0.2763704, 0.2793079, 0.3805710, 0.4288939, 0.3754336…
+$ totdeath         &lt;int&gt; 650, 832, 441, 200, 60, 42, 89, 87, 105, 189, 170, 15…
+$ best_binary      &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…
+$ MatMort          &lt;int&gt; 1450, 1390, 1300, 1240, 1180, 1140, 1120, 1090, 1030,…
+$ InfantMort       &lt;dbl&gt; 90.5, 87.9, 85.3, 82.7, 80.0, 77.3, 74.6, 71.9, 69.2,…
+$ NeonatalMort     &lt;dbl&gt; 60.9, 59.7, 58.5, 57.2, 55.9, 54.6, 53.2, 51.7, 50.3,…
+$ Under5Mort       &lt;dbl&gt; 129.2, 125.2, 121.1, 116.9, 112.6, 108.4, 104.1, 99.9…
+$ drought_dummy    &lt;int&gt; 1, 0, 0, 0, 0, 0, 1, NA, 1, 0, 0, 1, 0, 0, NA, 0, NA,…
+$ earthquake_dummy &lt;int&gt; 0, 1, 1, 1, 1, 1, 1, NA, 0, 1, 1, 0, 1, 1, NA, 1, NA,…
+$ drought          &lt;int&gt; 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0,…
+$ earthquake       &lt;int&gt; 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0,…</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="data-summary-of-numerical-variables" class="level4">
+<h4 class="anchored" data-anchor-id="data-summary-of-numerical-variables">Data summary of numerical variables</h4>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>      year         gdp1000              OECD          OECD2023     
+ Min.   :2000   Min.   :  0.1105   Min.   :0.000   Min.   :0.0000  
+ 1st Qu.:2005   1st Qu.:  1.2383   1st Qu.:0.000   1st Qu.:0.0000  
+ Median :2010   Median :  4.0719   Median :0.000   Median :0.0000  
+ Mean   :2010   Mean   : 11.4917   Mean   :0.171   Mean   :0.1882  
+ 3rd Qu.:2014   3rd Qu.: 13.1531   3rd Qu.:0.000   3rd Qu.:0.0000  
+ Max.   :2019   Max.   :123.6787   Max.   :1.000   Max.   :1.0000  
+                NA's   :62                                         
+    popdens          urban             agedep          male_edu     
+ Min.   : 0.00   Min.   : 0.1025   Min.   : 16.17   Min.   : 1.067  
+ 1st Qu.:14.79   1st Qu.:17.2872   1st Qu.: 47.94   1st Qu.: 5.904  
+ Median :27.52   Median :30.2535   Median : 55.51   Median : 8.368  
+ Mean   :30.57   Mean   :30.6948   Mean   : 61.94   Mean   : 8.258  
+ 3rd Qu.:40.72   3rd Qu.:41.6558   3rd Qu.: 77.11   3rd Qu.:10.849  
+ Max.   :99.86   Max.   :93.4135   Max.   :111.48   Max.   :14.441  
+ NA's   :20      NA's   :20                         NA's   :20      
+      temp         rainfall1000        totdeath         best_binary    
+ Min.   :-2.405   Min.   :0.01993   Min.   :    0.00   Min.   :0.0000  
+ 1st Qu.:12.928   1st Qu.:0.59146   1st Qu.:    0.00   1st Qu.:0.0000  
+ Median :21.958   Median :1.01288   Median :    0.00   Median :0.0000  
+ Mean   :19.625   Mean   :1.20216   Mean   :   71.56   Mean   :0.2661  
+ 3rd Qu.:25.869   3rd Qu.:1.68706   3rd Qu.:    1.00   3rd Qu.:1.0000  
+ Max.   :29.676   Max.   :4.71081   Max.   :48183.00   Max.   :1.0000  
+ NA's   :20       NA's   :20                                           
+    MatMort         InfantMort      NeonatalMort     Under5Mort    
+ Min.   :   2.0   Min.   :  1.60   Min.   : 0.80   Min.   :  2.00  
+ 1st Qu.:  17.0   1st Qu.:  7.60   1st Qu.: 4.90   1st Qu.:  9.00  
+ Median :  66.0   Median : 18.90   Median :12.10   Median : 22.20  
+ Mean   : 210.6   Mean   : 28.90   Mean   :16.18   Mean   : 40.50  
+ 3rd Qu.: 299.8   3rd Qu.: 44.52   3rd Qu.:25.32   3rd Qu.: 61.33  
+ Max.   :2480.0   Max.   :138.10   Max.   :60.90   Max.   :224.90  
+ NA's   :426      NA's   :20       NA's   :20      NA's   :20      
+ drought_dummy    earthquake_dummy    drought          earthquake     
+ Min.   :0.0000   Min.   :0.0000   Min.   :0.00000   Min.   :0.00000  
+ 1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.00000   1st Qu.:0.00000  
+ Median :1.0000   Median :1.0000   Median :0.00000   Median :0.00000  
+ Mean   :0.5527   Mean   :0.5272   Mean   :0.08737   Mean   :0.08333  
+ 3rd Qu.:1.0000   3rd Qu.:1.0000   3rd Qu.:0.00000   3rd Qu.:0.00000  
+ Max.   :1.0000   Max.   :1.0000   Max.   :1.00000   Max.   :1.00000  
+ NA's   :3132     NA's   :3132                                        </code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="initial-checks-for-covariates-distribution" class="level4">
+<h4 class="anchored" data-anchor-id="initial-checks-for-covariates-distribution">Initial checks for covariates distribution</h4>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Armed_Conflict_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>From this we learn that total death and GDP are highly skewed variables. It is reasonable, therefore, that we will be using a binary variable for total death. For GDP, the logarithamized graph would likely be easier to visualize.</p>
+<hr>
+</section>
+<section id="visualizing-the-spread-of-outcomes" class="level4">
+<h4 class="anchored" data-anchor-id="visualizing-the-spread-of-outcomes">Visualizing the spread of outcomes</h4>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Armed_Conflict_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>As we can see, all these outcome variables have some extreme outliers, something to consider during data analysis later on.</p>
+<hr>
+</section>
+<section id="correlation-matrix-for-covariates" class="level4">
+<h4 class="anchored" data-anchor-id="correlation-matrix-for-covariates">Correlation matrix for covariates</h4>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>                gdp1000     popdens       urban      agedep    male_edu
+gdp1000       1.0000000  0.27795445  0.35779747 -0.45979498  0.58498673
+popdens       0.2779544  1.00000000  0.72400777 -0.35956225  0.29127619
+urban         0.3577975  0.72400777  1.00000000 -0.35972849  0.36100170
+agedep       -0.4597950 -0.35956225 -0.35972849  1.00000000 -0.67824459
+male_edu      0.5849867  0.29127619  0.36100170 -0.67824459  1.00000000
+temp         -0.3858074 -0.10186701 -0.05505675  0.39882219 -0.64368392
+rainfall1000 -0.1289597 -0.08167352 -0.07585380  0.09075683 -0.13483154
+totdeath     -0.0375043 -0.02772498 -0.01680103  0.08404943 -0.05639189
+                     temp rainfall1000     totdeath
+gdp1000      -0.385807373  -0.12895965 -0.037504301
+popdens      -0.101867008  -0.08167352 -0.027724982
+urban        -0.055056751  -0.07585380 -0.016801026
+agedep        0.398822188   0.09075683  0.084049427
+male_edu     -0.643683917  -0.13483154 -0.056391890
+temp          1.000000000   0.41148598  0.008813999
+rainfall1000  0.411485984   1.00000000 -0.030371351
+totdeath      0.008813999  -0.03037135  1.000000000</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Armed_Conflict_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The correlation matrix reveals key relationships between socioeconomic and environmental variables. Higher GDP is positively linked to male education and urbanization but negatively associated with age dependency and temperature (likely reflecting other confounders), indicating that wealthier countries tend to have better education, more urbanization, and lower age dependency. Urbanization is strongly correlated with population density. These are important insights because they verify relationships that align with our knowledge of the world.</p>
+<hr>
+</section>
+<section id="correlation-matrix-for-outcomes" class="level4">
+<h4 class="anchored" data-anchor-id="correlation-matrix-for-outcomes">Correlation matrix for outcomes</h4>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>               MatMort InfantMort NeonatalMort Under5Mort
+MatMort      1.0000000  0.8785612    0.8354908  0.8994877
+InfantMort   0.8785612  1.0000000    0.9590878  0.9861117
+NeonatalMort 0.8354908  0.9590878    1.0000000  0.9278720
+Under5Mort   0.8994877  0.9861117    0.9278720  1.0000000</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Armed_Conflict_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Unsurprisingly, mortality outcomes are all highly inter-correlated (before conditioning on other variables), to the point of not being particularly informative as separate outcomes at this stage. Hence moving forward, I will primarily on total deaths.</p>
+<hr>
+</section>
+<section id="geographic-visualization-of-outcome-variable-total-death" class="level4">
+<h4 class="anchored" data-anchor-id="geographic-visualization-of-outcome-variable-total-death">Geographic visualization of outcome variable total death</h4>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Armed_Conflict_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Armed_Conflict_files/figure-html/unnamed-chunk-9-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Armed_Conflict_files/figure-html/unnamed-chunk-9-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Armed_Conflict_files/figure-html/unnamed-chunk-9-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Here we plot the total deaths by year over a world map, which is a natural way to plot data for geopolitical variables. This gives us an evolving picture of global conflicts across time with a heatmap showing total deaths. What is particularly noticeable is significant spikes in mortality in the first half of the study in some countries in Africa, and South East Asia and Middle East in the latter half.</p>
+<hr>
+</section>
+<section id="visualization-of-deaths-by-region" class="level4">
+<h4 class="anchored" data-anchor-id="visualization-of-deaths-by-region">Visualization of Deaths by Region</h4>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Armed_Conflict_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Next, we can start to create some visualizations to study relationships between multiple variables which may help us design our causal analyses later. Here we combine several subregions into regions to study them together. In this bubble plot, color represents region, size represents average number of deaths by year, and these are plotted against logarithm of GDP and population density. A relationship is beginning to emerg, showing that countries with lower GDP tend to have higher rates of total deaths, however region tends to show much stronger influence on total deaths.</p>
+<hr>
+</section>
+<section id="bump-chart-visualization-for-global-infant-mortality-ranking" class="level4">
+<h4 class="anchored" data-anchor-id="bump-chart-visualization-for-global-infant-mortality-ranking">Bump Chart Visualization for Global Infant Mortality Ranking</h4>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Armed_Conflict_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Finally, we look at the top 15 countries with respect to infant mortality over time, which is an outcome of interest Here we use a bump chart. For instance, we see the rank rise in the early 2010s in the DRC, at a time of significant conflict in the region.</p>
+<p>As we can see, there are both numerical and visual ways of exploring the rich information found in this database. The visualizations help suggest many potential avenues for further research, which would require a careful deep dive into particular trends found within the data.</p>
+<hr>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

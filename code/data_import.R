@@ -37,9 +37,9 @@ combine_dataframes <- function (list_of_dataframes, join_by_list) {
 
 # clean data, except for disaster csv
 matmort_subset <- data_cleaning (matmort, "MatMort")
-infant_subset <- data_cleaning (matmort, "InfantMort")
-neonatal_subset <- data_cleaning (matmort, "NeonatalMort")
-under5_subset <- data_cleaning (matmort, "Under5Mort")
+infant_subset <- data_cleaning (infant, "InfantMort")
+neonatal_subset <- data_cleaning (neonatal, "NeonatalMort")
+under5_subset <- data_cleaning (under5, "Under5Mort")
 
 subset_list <- list(matmort_subset, infant_subset, neonatal_subset, under5_subset)
 
