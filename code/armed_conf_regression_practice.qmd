@@ -1,0 +1,148 @@
+---
+title: "armed_conflict_regression_test"
+format: html
+editor: visual
+---
+
+#### Loading Data
+
+```{r}
+#| output: false 
+#| echo: false
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(ggplot2)
+  library(gridExtra)
+  library(reshape2)
+  library(tidyr)
+  library(here)
+  library(usethis)
+  library(plm)
+  library(texreg)
+})
+
+here() #set wd
+# Running the script using source()
+df <- read.csv("../data/final_analysis_dataset.csv")
+
+# Rename the column in the original dataframe
+df <- df %>%
+  rename(arm_conf_binary = arm_conf_binary)
+
+
+```
+
+# Fixed effect for country only
+
+```{r}
+#| output: false 
+#| echo: false
+
+
+
+mod1_lm <- lm (MatMort~ -1 + arm_conf_binary + gdp1000 + OECD + popdens + urban + agedep + male_edu + temp + rainfall1000 + earthquake + drought + ISO + as.factor(year), data = df)
+
+mod1_plm <- plm (MatMort~ arm_conf_binary + gdp1000 + OECD + popdens + urban + agedep + male_edu + temp + rainfall1000 + earthquake + drought , index=c("ISO"), model="within",data = df)
+
+screenreg(list(mod1_lm,mod1_plm))
+
+```
+
+# Fixed effect for country and year
+
+```{r}
+#| output: false 
+#| echo: false
+
+
+mod2_lm <- lm (MatMort~ -1 + arm_conf_binary + gdp1000 + OECD2023 + popdens + urban + agedep + male_edu + temp + rainfall1000 + earthquake + drought + ISO + as.factor(year), data = df)
+
+mod2_plm <- plm (MatMort~ arm_conf_binary + gdp1000 + OECD2023 + popdens + urban + agedep + male_edu + temp + rainfall1000 + earthquake + drought, 
+                 index=c("ISO", "year"),
+                 effect = "twoways",
+                 model="within",
+                 data = df)
+
+screenreg(list(mod2_lm,mod2_plm))
+
+
+```
+
+# Automate code across different models
+
+```{r}
+#| output: false 
+#| echo: false
+
+# more efficient code 
+preds <- as.formula(" ~ arm_conf_binary + gdp1000 + OECD2023 + popdens + urban + agedep + male_edu + temp + rainfall1000 + earthquake + drought + ISO + as.factor(year)")
+
+matmormod_lm <- lm(update.formula(preds, MatMort ~ .), data = df)
+un5mormod_lm <- lm(update.formula(preds, NeonatalMort ~ .), data = df)
+infmormod_lm <- lm(update.formula(preds, InfantMort ~ .), data = df)
+neomormod_lm <- lm(update.formula(preds, Under5Mort ~ .), data = df)
+
+screenreg(list(matmormod_lm,un5mormod_lm,infmormod_lm,neomormod_lm))
+
+
+```
+
+# Automate code across different plm() models
+
+```{r}
+#| output: false 
+#| echo: false
+
+
+
+# more efficient code 
+preds <- as.formula(" ~ arm_conf_binary + log(gdp1000) + OECD2023 + popdens + urban + agedep + male_edu + temp + rainfall1000 + earthquake + drought")
+
+matmormod_plm <- plm(update.formula(preds, MatMort ~ .), 
+                     index = c("year", "ISO"), 
+                     effect ="twoways",
+                     model="within", data = df)
+un5mormod_plm <- plm(update.formula(preds, NeonatalMort ~ .), 
+                     index = c("year", "ISO"), 
+                     effect ="twoways",
+                     model="within", data = df)
+infmormod_plm <- plm(update.formula(preds, InfantMort ~ .), 
+                     index = c("year", "ISO"), 
+                     effect ="twoways",
+                     model="within", data = df)
+neomormod_plm <- plm(update.formula(preds, Under5Mort ~ .), 
+                     index = c("year", "ISO"), 
+                     effect ="twoways",
+                     model="within", data = df)
+
+
+screenreg(list(matmormod_plm,un5mormod_plm,infmormod_plm,neomormod_plm))
+
+
+```
+
+```{r}
+
+library(stargazer)
+
+# Create a list of models
+models <- list(matmormod_plm, neomormod_plm, infmormod_plm, un5mormod_plm)
+
+# Use stargazer to output a table with 95% CIs
+stargazer(matmormod_plm, neomormod_plm, infmormod_plm, un5mormod_plm,
+          type = "text",
+          title = "Panel Regression Models for Mortality (95% Confidence Intervals)",
+          column.labels = c("MatMort", "NeonatalMort", "InfantMort", "Under5Mort"),
+          dep.var.labels.include = FALSE,
+          covariate.labels = c("Armed Conflict (Binary)", "Log(GDP)", "OECD2023", 
+                               "Population Density", "Urbanization", 
+                               "Age Dependency", "Male Education", 
+                               "Temperature", "Rainfall", 
+                               "Earthquake", "Drought"),
+          model.names = FALSE,
+          omit.stat = c("f", "ser"),
+          ci=TRUE,
+          digits=2)
+```
+
+
