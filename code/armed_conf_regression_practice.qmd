@@ -4,13 +4,13 @@ format: html
 editor: visual
 ---
 
-#### Loading Data
 
 ```{r}
 #| output: false 
 #| echo: false
 suppressPackageStartupMessages({
   library(dplyr)
+  library(stargazer)
   library(ggplot2)
   library(gridExtra)
   library(reshape2)
@@ -21,23 +21,26 @@ suppressPackageStartupMessages({
   library(texreg)
 })
 
+#### Loading Data
+
+
 here() #set wd
 # Running the script using source()
 df <- read.csv("../data/final_analysis_dataset.csv")
 
 # Rename the column in the original dataframe
 df <- df %>%
-  rename(arm_conf_binary = arm_conf_binary)
+  rename(arm_conf_binary = best_binary)
 
 
 ```
 
-# Fixed effect for country only
 
 ```{r}
 #| output: false 
 #| echo: false
 
+# Fixed effect for country only
 
 
 mod1_lm <- lm (MatMort~ -1 + arm_conf_binary + gdp1000 + OECD + popdens + urban + agedep + male_edu + temp + rainfall1000 + earthquake + drought + ISO + as.factor(year), data = df)
@@ -48,12 +51,12 @@ screenreg(list(mod1_lm,mod1_plm))
 
 ```
 
-# Fixed effect for country and year
 
 ```{r}
 #| output: false 
 #| echo: false
 
+# Fixed effect for country and year
 
 mod2_lm <- lm (MatMort~ -1 + arm_conf_binary + gdp1000 + OECD2023 + popdens + urban + agedep + male_edu + temp + rainfall1000 + earthquake + drought + ISO + as.factor(year), data = df)
 
@@ -68,11 +71,13 @@ screenreg(list(mod2_lm,mod2_plm))
 
 ```
 
-# Automate code across different models
 
 ```{r}
 #| output: false 
 #| echo: false
+
+
+# Automate code across different models
 
 # more efficient code 
 preds <- as.formula(" ~ arm_conf_binary + gdp1000 + OECD2023 + popdens + urban + agedep + male_edu + temp + rainfall1000 + earthquake + drought + ISO + as.factor(year)")
@@ -87,12 +92,12 @@ screenreg(list(matmormod_lm,un5mormod_lm,infmormod_lm,neomormod_lm))
 
 ```
 
-# Automate code across different plm() models
 
 ```{r}
 #| output: false 
 #| echo: false
 
+# Automate code across different plm() models
 
 
 # more efficient code 
@@ -121,9 +126,11 @@ screenreg(list(matmormod_plm,un5mormod_plm,infmormod_plm,neomormod_plm))
 
 ```
 
-```{r}
+# Table 2
 
-library(stargazer)
+```{r}
+#| echo: false
+
 
 # Create a list of models
 models <- list(matmormod_plm, neomormod_plm, infmormod_plm, un5mormod_plm)
