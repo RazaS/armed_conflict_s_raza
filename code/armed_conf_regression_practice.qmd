@@ -4,7 +4,6 @@ format: html
 editor: visual
 ---
 
-
 ```{r}
 #| output: false 
 #| echo: false
@@ -35,7 +34,6 @@ df <- df %>%
 
 ```
 
-
 ```{r}
 #| output: false 
 #| echo: false
@@ -50,7 +48,6 @@ mod1_plm <- plm (MatMort~ arm_conf_binary + gdp1000 + OECD + popdens + urban + a
 screenreg(list(mod1_lm,mod1_plm))
 
 ```
-
 
 ```{r}
 #| output: false 
@@ -71,7 +68,6 @@ screenreg(list(mod2_lm,mod2_plm))
 
 ```
 
-
 ```{r}
 #| output: false 
 #| echo: false
@@ -91,7 +87,6 @@ screenreg(list(matmormod_lm,un5mormod_lm,infmormod_lm,neomormod_lm))
 
 
 ```
-
 
 ```{r}
 #| output: false 
@@ -151,5 +146,3 @@ stargazer(matmormod_plm, neomormod_plm, infmormod_plm, un5mormod_plm,
           ci=TRUE,
           digits=2)
 ```
-
-

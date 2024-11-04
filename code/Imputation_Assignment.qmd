@@ -1,0 +1,168 @@
+---
+title: "Imputation_Assignment"
+format: html
+editor: visual
+---
+
+---
+title: "armed_conflict_regression_test"
+format: html
+editor: visual
+---
+
+## Import Data
+
+```{r}
+#| output: false 
+#| echo: false
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(stargazer)
+  library(ggplot2)
+  library(gridExtra)
+  library(reshape2)
+  library(tidyr)
+  library(here)
+  library(usethis)
+  library(plm)
+  library(texreg)
+})
+
+#### Loading Data
+
+
+here() #set wd
+# Running the script using source()
+df <- read.csv("../data/final_analysis_dataset.csv")
+
+# Rename the column in the original dataframe
+df <- df %>%
+  rename(arm_conf_binary = best_binary)
+
+
+df <- df %>% mutate(loggdp=log(gdp1000))
+
+
+```
+
+## Complete Case Analysis
+
+```{r}
+#| echo: false
+
+
+# Automate code across different models
+
+# more efficient code 
+preds <- as.formula(" ~ arm_conf_binary + gdp1000 + OECD2023 + popdens + urban + agedep + male_edu + temp + rainfall1000 + ISO + as.factor(year)")
+
+matmormod_lm <- lm(update.formula(preds, MatMort ~ .), data = df)
+un5mormod_lm <- lm(update.formula(preds, NeonatalMort ~ .), data = df)
+infmormod_lm <- lm(update.formula(preds, InfantMort ~ .), data = df)
+neomormod_lm <- lm(update.formula(preds, Under5Mort ~ .), data = df)
+
+screenreg(list(matmormod_lm,un5mormod_lm,infmormod_lm,neomormod_lm))
+
+
+
+
+```
+
+
+## Visualize Missingness
+
+```{r}
+
+library(naniar)
+df %>%
+  arrange(year, ISO) %>%
+  dplyr::select(-country_name, -ISO, -region, -year) %>%
+  vis_miss()
+
+```
+
+
+## Multiple Imputation
+
+```{r}
+
+library(mice)
+
+midata <- df |>
+  mutate(ISOnum = as.numeric(as.factor(df$ISO))) |>
+  select(-country_name, -ISO)
+
+mice0  <- mice(midata, seed = 100, m = 5, maxit = 0, print = F)
+
+meth <- mice0$method
+meth[c("urban", "male_edu", "temp", "rainfall1000", "MatMort", "InfantMort", "NeonatalMort", "Under5Mort", "loggdp", "popdens")] <- "2l.lmer"
+
+pred <- mice0$predictorMatrix
+pred[c("urban", "male_edu", "temp", "rainfall1000", "MatMort", "InfantMort", "NeonatalMort", "Under5Mort", "loggdp", "popdens"), "ISOnum"] <- -2
+
+mice.multi.out  <- mice(midata, seed = 100, m = 10, maxit = 20,
+                        method = meth,
+                        predictorMatrix = pred)
+
+```
+
+## Visualization
+
+```{r}
+
+
+plot(mice.multi.out)
+
+MI_df_1 <- complete(mice.multi.out, action = 2)
+
+MI_df_1 %>%
+  arrange(year, ISOnum) %>%
+  dplyr::select(-ISOnum, -region, -year) %>%
+  vis_miss()
+
+
+
+```
+
+## Use MI data to perform regression 
+
+```{r}
+#| echo: false
+
+# Fit a linear regression model on each imputed dataset
+mice_model_MatMort <- with(data = mice.multi.out, 
+                   expr = lm(MatMort ~ arm_conf_binary+ urban + male_edu + temp + rainfall1000 + loggdp + popdens))
+
+pooled_model_MatMort <- pool(mice_model_MatMort)
+
+
+mice_model_NeonatalMort <- with(data = mice.multi.out, 
+                   expr = lm(NeonatalMort ~  arm_conf_binary+urban + male_edu + temp + rainfall1000 + loggdp + popdens))
+
+pooled_model_NeonatalMort <- pool(mice_model_NeonatalMort)
+
+
+mice_model_InfantMort <- with(data = mice.multi.out, 
+                   expr = lm(InfantMort ~  arm_conf_binary+urban + male_edu + temp + rainfall1000 + loggdp + popdens))
+
+pooled_model_InfantMort <- pool(mice_model_InfantMort)
+
+
+mice_model_Under5Mort <- with(data = mice.multi.out, 
+                   expr = lm(Under5Mort ~  arm_conf_binary+urban + male_edu + temp + rainfall1000 + loggdp + popdens))
+
+pooled_model_Under5Mort <- pool(mice_model_Under5Mort)
+
+
+screenreg(list(matmormod_lm, pooled_model_MatMort,
+               un5mormod_lm, pooled_model_NeonatalMort,
+               infmormod_lm, pooled_model_InfantMort,
+               neomormod_lm, pooled_model_Under5Mort),
+          custom.model.names = c("Mat Mortality-CC", "Mat Mortality-MI",
+                                 "Neonatal Mortality-CC", "Neonatal Mortality-MI", 
+                                 "Infant Mortality-CC", "Infant Mortality-MI",
+                                 "Under-5 Mortality-CC","Under-5 Mortality-MI"))
+
+
+
+```
